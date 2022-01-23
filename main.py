@@ -1,17 +1,37 @@
+#import tweepy module
 import tweepy
-# This is a sample Python script.
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+#setting values for API access
+consumer_key = ""
+consumer_secret = ""
+access_token = ""
+access_token_secret = ""
 
+#setting up Tweepy to search and use twitter API
+auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+auth.set_access_token(access_token, access_token_secret)
+#calling API
+api = tweepy.API(auth, wait_on_rate_limit = True)#ensures I don't go over rate limit with requests
+#search by name method
+def searchByName(term, x):
+    searchTerm = term
+    userList = api.search_users(searchTerm, page=x)
+    return userList
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+#blocking method
+def timelineCleanser(searchTerm, pageNum):
+    blocked = api.get_blocks()
+    while(pageNum <=15):#blocks the first 300 users
+        blockables = searchByName(searchTerm, pageNum)
+        for user in blockables:
+            if(user in blocked):
+                print("User " + user.screen_name + " is already blocked.")
+            else:
+                api.create_block(screen_name=user.screen_name)
+                print("User " + user.screen_name + " has been successfully blocked.")
+        pageNum = pageNum + 1
 
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm!')
+    timelineCleanser("term", 1)#substitute "term" for whatever term you want to block
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
